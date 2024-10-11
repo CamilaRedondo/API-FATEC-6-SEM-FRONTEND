@@ -1,0 +1,45 @@
+.sidebar-container {
+    background-color: #1b1c1e;
+    padding: 16px;
+    margin: 16px;
+    border-radius: 8px;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  
+      button {
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+      }
+  
+      button:hover {
+        opacity: 0.8;
+      }
+  
+      button:focus {
+        outline: none;
+      }
+  
+      .SidebarIcon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  
+    .sidebar-body {
+      flex-grow: 1;
+    }
+  
+    button.custom-button {
+      margin-top: auto;
+    }
+  }
+  
