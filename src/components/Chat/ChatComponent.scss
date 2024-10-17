@@ -19,6 +19,33 @@
       height: 156px;
       margin-bottom: 20px;
     }
+
+    .chat-message {
+      max-width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      word-wrap: break-word;
+
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+
+      &.user {
+        align-self: flex-end;
+        background-color: #1B1C1E;
+        color: #7B7B7B;
+        border-radius: 10px 10px 0 10px;
+      }
+
+      &.bot {
+        align-self: flex-start;
+        background-color: #1B1C1E;
+        color: #7B7B7B;
+        border-radius: 10px 10px 10px 0;
+      }
+    }
   }
 
   .chat-footer {
@@ -27,12 +54,12 @@
     align-items: center;
     padding: 10px;
 
-
     .chat-footer-buttons {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      width: 100%;
     }
 
     .chat-footer-info {
