@@ -1,7 +1,7 @@
 <template>
     <div class="button-container">
         <button class="button">
-            Novo Chat
+            Novo chat
         </button>
       
     </div>
