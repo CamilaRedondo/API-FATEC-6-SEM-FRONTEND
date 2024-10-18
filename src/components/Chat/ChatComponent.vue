@@ -2,34 +2,40 @@
   <div class="chat-container">
     <div class="chat-messages">
       <!-- Se não houver mensagens, renderiza a imagem -->
-      <img
-        v-if="!messages.length"
-        class="logo"
-        src="../../assets/images/LighthouseLogo.svg"
-        alt="Logo"
-      />
+      <div v-if="!messages.length" class="logo-container">
+        <img
+          class="logo"
+          src="../../assets/images/LighthouseLogo.svg"
+          alt="Logo"
+        />
+      </div>
       <!-- Se houver mensagens, renderiza as mensagens -->
       <div class="h-100" v-else>
         <div
           v-for="(message, index) in messages"
           :key="index"
           class="chat-message-wrapper"
+          :class="message.type"
         >
+          <!-- Ícone do bot ao lado esquerdo -->
+          <img
+            v-if="message.type === 'bot'"
+            src="@/assets/icons/ProfileIconBot.svg"
+            alt="Bot Profile"
+            class="profile-icon"
+          />
+
           <div class="chat-message" :class="message.type">
-            <img
-              v-if="message.type === 'bot'"
-              src="@/assets/icons/ProfileIconBot.svg"
-              alt="Bot Profile"
-              class="profile-icon"
-            />
-            <img
-              v-else
-              src="@/assets/icons/ProfileIcon.svg"
-              alt="User Profile"
-              class="profile-icon"
-            />
             <p>{{ message.text }}</p>
           </div>
+
+          <!-- Ícone do usuário ao lado direito -->
+          <img
+            v-if="message.type === 'user'"
+            src="@/assets/icons/ProfileIcon.svg"
+            alt="User Profile"
+            class="profile-icon"
+          />
         </div>
       </div>
     </div>
@@ -42,8 +48,7 @@
         <SubmitButtonComponent @submitMessage="sendMessage" />
       </div>
       <p class="chat-footer-info">
-        LighthouseBot pode cometer erros. Considere verificar informações
-        importantes.
+        LighthouseBot pode cometer erros. Considere verificar informações importantes.
       </p>
     </div>
   </div>
