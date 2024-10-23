@@ -43,7 +43,7 @@
     <div class="chat-footer">
       <div class="chat-footer-buttons">
         <!-- O MessageInputComponent recebe a mensagem via prop -->
-        <MessageInputComponent v-model="newMessage" />
+        <MessageInputComponent @submitMessage="sendMessage" v-model="newMessage" />
         <!-- O SubmitButtonComponent dispara o envio da mensagem -->
         <SubmitButtonComponent @submitMessage="sendMessage" />
       </div>
