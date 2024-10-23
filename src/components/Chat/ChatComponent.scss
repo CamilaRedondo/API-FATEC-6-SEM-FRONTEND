@@ -11,13 +11,15 @@
     padding: 10px;
     display: flex;
     flex-direction: column;
-
+    
     .logo-container {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 10px;
-
+      
+      height: 100%
+      ;
       .logo {
         width: 156px;
         height: 156px;
