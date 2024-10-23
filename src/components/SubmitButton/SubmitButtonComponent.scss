@@ -1,0 +1,17 @@
+.rounded-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background-color: #1b1c1e;
+  color: var(--title-texts);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-icon {
+  width: 24px;
+  height: 24px;
+}
