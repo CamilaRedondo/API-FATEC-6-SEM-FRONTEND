@@ -64,28 +64,66 @@ export default {
     return {
       newMessage: "", // Nova mensagem a ser enviada
       messages: [], // Armazena todas as mensagens
+      socket: null, // WebSocket
     };
   },
   components: {
     MessageInputComponent,
     SubmitButtonComponent,
   },
+  created() {
+    // Inicia a conexão WebSocket
+    this.connectWebSocket();
+  },
   methods: {
+    connectWebSocket() {
+      // Cria uma conexão WebSocket com o servidor
+      this.socket = new WebSocket("ws://localhost:8081");
+
+      // Quando a conexão é estabelecida
+      this.socket.onopen = () => {
+        console.log("Conexão WebSocket estabelecida.");
+      };
+
+      // Quando o servidor envia uma mensagem
+      this.socket.onmessage = (event) => {
+        const botResponse = event.data;
+        // Adiciona a resposta do bot nas mensagens
+        this.messages.push({ text: botResponse, type: "bot" });
+      };
+
+      // Quando a conexão é fechada
+      this.socket.onclose = () => {
+        console.log("Conexão WebSocket fechada.");
+      };
+
+      // Quando ocorre um erro
+      this.socket.onerror = (error) => {
+        console.error("Erro no WebSocket:", error);
+      };
+    },
     sendMessage() {
       if (this.newMessage.trim()) {
         // Adiciona a mensagem do usuário
         this.messages.push({ text: this.newMessage, type: "user" });
-        this.newMessage = ""; // Limpa o campo de input
 
-        // Simula uma resposta do bot após um curto delay
-        setTimeout(() => {
-          this.messages.push({
-            text: "Esta é uma resposta do LighthouseBot.",
-            type: "bot",
-          });
-        }, 1000);
+        // Envia a mensagem para o servidor WebSocket
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          this.socket.send(this.newMessage);
+        } else {
+          console.error("Conexão WebSocket não está aberta.");
+        }
+
+        // Limpa o campo de input
+        this.newMessage = "";
       }
     },
+  },
+  beforeUnmount() {
+    // Fecha a conexão WebSocket quando o componente for destruído
+    if (this.socket) {
+      this.socket.close();
+    }
   },
 };
 </script>
