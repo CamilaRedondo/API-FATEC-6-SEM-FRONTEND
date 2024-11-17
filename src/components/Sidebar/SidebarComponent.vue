@@ -7,7 +7,6 @@
       </button>
     </div>
 
-    
     <div class="sidebar-body">
       <!-- Lista de datas e conversas -->
       <div v-for="(conversations, date) in groupedConversations" :key="date" class="conversation-group">
@@ -15,55 +14,63 @@
         <p class="conversation-date">{{ date }}</p>
         <div v-for="(conversation, index) in conversations" :key="index" class="conversation-item">
           <button @click="loadConversation(date, index)" class="conversation-button">
-            <p class="conversation-snippet">{{ conversation.snippet }}</p>
+            <p class="conversation-snippet">{{ conversation.preview }}</p>
           </button>
         </div>
       </div>
     </div>
 
-    <DividerComponent />
+    <DividerComponent/>
 
-    <ButtonComponent class="custom-button" />
+    <ButtonComponent class="custom-button" @new-chat="startNewChat"/>
   </div>
 </template>
 
 <script>
 import ButtonComponent from "../Button/ButtonComponent.vue";
 import DividerComponent from "../Divider/DividerComponent.vue";
+import { useConversationStore } from "@/stores/conversationStore.js";
+import { computed } from "vue";
 
 export default {
   name: "SidebarComponent",
   components: {
     DividerComponent,
-    ButtonComponent
+    ButtonComponent,
   },
-  data() {
+  setup(_, { emit }) {
+    const conversationStore = useConversationStore();
+
+    // Computa as conversas agrupadas com previews
+    const groupedConversations = computed(() => {
+      const data = conversationStore.conversations;
+
+      return Object.entries(data).reduce((result, [date, chats]) => {
+        result[date] = Object.entries(chats).map(([index, messages]) => {
+          const botMessage = messages.find((msg) => msg.type === "bot");
+          const preview = botMessage ? botMessage.text : messages[0]?.text || "";
+          return { index, preview, fullChat: messages };
+        });
+        return result;
+      }, {});
+    });
+
+    // Função para carregar uma conversa
+    const loadConversation = (date, index) => {
+      conversationStore.selectChat = index;
+      emit("conversation-selected", conversationStore.conversations[date][index]);
+    };
+
+    const startNewChat = conversationStore.startNewChat;
+
     return {
-      // Conversas agrupadas por data
-      groupedConversations: {
-        '17/10/2024': [
-          { snippet: 'Olá, como posso ajudar?', fullText: 'Histórico completo da conversa 1 no dia 17/10/2024...' },
-          { snippet: 'Poderia me ajudar com uma tarefa?', fullText: 'Histórico completo da conversa 2 no dia 17/10/2024...' }
-        ],
-        '16/10/2024': [
-          { snippet: 'Qual é a previsão do tempo?', fullText: 'Histórico completo da conversa 1 no dia 16/10/2024...' }
-        ],
-        '15/10/2024': [
-          { snippet: 'Me conte mais sobre IA.', fullText: 'Histórico completo da conversa 1 no dia 15/10/2024...' }
-        ]
-      }
+      groupedConversations,
+      loadConversation,
+      startNewChat,
     };
   },
-  methods: {
-    loadConversation(date, index) {
-      // Carrega a conversa selecionada e emite para o componente pai
-      this.$emit('conversation-selected', this.groupedConversations[date][index]);
-      console.log(this.groupedConversations[date][index]);
-    }
-  }
 };
 </script>
-
 
 <style lang="scss" scoped>
 @import "./SidebarComponent.scss";
