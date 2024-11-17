@@ -25,9 +25,10 @@
             class="profile-icon"
           />
 
-          <div class="chat-message" :class="message.type">
-            <p>{{ message.text }}</p>
-          </div>
+          <div class="chat-message"
+          v-html="formatMessage(message.text)" 
+          :class="message.type">
+        </div>
 
           <!-- Ícone do usuário ao lado direito -->
           <img
@@ -132,6 +133,12 @@ export default {
         this.newMessage = "";
       }
     },
+    formatMessage(text) {
+    text = text.replace(/\n/g, '<br>');
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    return text;
+  },
   },
   beforeUnmount() {
     // Fecha a conexão WebSocket quando o componente for destruído
