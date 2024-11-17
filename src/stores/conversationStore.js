@@ -9,8 +9,7 @@ export const useConversationStore = defineStore("conversationStore", {
     formatDate(date = new Date()) {
       return date.toLocaleDateString("pt-BR"); // Define o formato brasileiro
     },
-    initializeDate() {
-      const date = this.formatDate();
+    initializeDate(date) {
       // Cria uma nova entrada de data se não existir
       if (!this.conversations[date]) {
         this.conversations[date] = {}; // Inicializa como um dicionário
@@ -23,7 +22,7 @@ export const useConversationStore = defineStore("conversationStore", {
     },
     addConversation(text, type) {
       const date = this.formatDate();
-      this.initializeDate();
+      this.initializeDate(date);
       // Adiciona a nova conversa no array da data específica
       this.conversations[date][this.selectChat].push({ text, type });
       this.saveToLocalStorage();
@@ -39,16 +38,18 @@ export const useConversationStore = defineStore("conversationStore", {
     startNewChat() {
       const date = this.formatDate();
 
-      // Se não houver data atual, cria uma nova
-      if (!this.conversations[date]) {
-        this.conversations[date] = {};
+      // Verifica se o chat atual está vazio antes de criar um novo
+      const currentChat = this.conversations[date][this.selectChat];
+      if (currentChat && currentChat.length === 0) {
+        console.warn(
+          "O chat atual está vazio. Não é possível criar um novo chat."
+        );
+        return;
       }
 
       // Incrementa o índice do novo chat
       this.selectChat = Object.keys(this.conversations[date]).length;
 
-      // Cria a lista de mensagens para o novo chat
-      this.conversations[date][this.selectChat] = [];
       this.saveToLocalStorage();
     },
   },
