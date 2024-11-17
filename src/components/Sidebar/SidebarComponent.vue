@@ -1,10 +1,7 @@
 <template>
   <div class="sidebar-container">
     <div class="sidebar-header">
-      <img src="../../assets/images/LIGHTHOUSE BOT.svg" alt="Logo" />
-      <button>
-        <img class="SidebarIcon" src="../../assets/icons/SidebarIcon.svg" alt="Icon" />
-      </button>
+      <img class="sidebar-logo" src="../../assets/images/LIGHTHOUSE BOT.svg" alt="Logo" />
     </div>
 
     
