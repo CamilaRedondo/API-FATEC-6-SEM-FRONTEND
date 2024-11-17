@@ -43,11 +43,15 @@ export default {
       const data = conversationStore.conversations;
 
       return Object.entries(data).reduce((result, [date, chats]) => {
-        result[date] = Object.entries(chats).map(([index, messages]) => {
-          const botMessage = messages.find((msg) => msg.type === "bot");
-          const preview = botMessage ? botMessage.text : messages[0]?.text || "";
-          return { index, preview, fullChat: messages };
-        });
+        const sortedChats = Object.entries(chats)
+          .sort(([a], [b]) => b - a) // Ordena os índices em ordem decrescente
+          .map(([index, messages]) => {
+            const botMessage = messages.find((msg) => msg.type === "bot");
+            const preview = botMessage ? botMessage.text : messages[0]?.text ;
+            return { index, preview, fullChat: messages };
+          });
+
+        result[date] = sortedChats; // Adiciona os chats ordenados
         return result;
       }, {});
     });
