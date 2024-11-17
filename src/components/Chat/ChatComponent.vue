@@ -71,7 +71,7 @@ export default {
     const conversationStore = useConversationStore();
 
     // Computa a data atual
-    const currentDate = computed(() => new Date().toLocaleDateString());
+    const currentDate = computed(() => new Date().toLocaleDateString("pt-BR"));
 
     // Computa as mensagens do chat selecionado
     const currentMessages = computed(() => {

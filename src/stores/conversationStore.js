@@ -6,8 +6,11 @@ export const useConversationStore = defineStore("conversationStore", {
     selectChat: 0,
   }),
   actions: {
+    formatDate(date = new Date()) {
+      return date.toLocaleDateString("pt-BR"); // Define o formato brasileiro
+    },
     initializeDate() {
-      const date = new Date().toLocaleDateString();
+      const date = this.formatDate();
       // Cria uma nova entrada de data se não existir
       if (!this.conversations[date]) {
         this.conversations[date] = {}; // Inicializa como um dicionário
@@ -16,10 +19,10 @@ export const useConversationStore = defineStore("conversationStore", {
       // Cria o chat `selectChat` caso ele não exista
       if (!this.conversations[date][this.selectChat]) {
         this.conversations[date][this.selectChat] = [];
-      }      
+      }
     },
     addConversation(text, type) {
-      const date = new Date().toLocaleDateString();
+      const date = this.formatDate();
       this.initializeDate();
       // Adiciona a nova conversa no array da data específica
       this.conversations[date][this.selectChat].push({ text, type });
@@ -34,7 +37,7 @@ export const useConversationStore = defineStore("conversationStore", {
       );
     },
     startNewChat() {
-      const date = new Date().toLocaleDateString();
+      const date = this.formatDate();
 
       // Se não houver data atual, cria uma nova
       if (!this.conversations[date]) {
