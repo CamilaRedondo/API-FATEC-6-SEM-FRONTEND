@@ -10,7 +10,7 @@
       <DividerComponent />
         <p class="conversation-date">{{ date }}</p>
         <div v-for="(conversation, index) in conversations" :key="index" class="conversation-item">
-          <button @click="loadConversation(date, index)" class="conversation-button">
+          <button @click="loadConversation(date, conversation.originalIndex)" class="conversation-button">
             <p class="conversation-snippet">{{ conversation.preview }}</p>
           </button>
         </div>
@@ -45,10 +45,10 @@ export default {
       return Object.entries(data).reduce((result, [date, chats]) => {
         const sortedChats = Object.entries(chats)
           .sort(([a], [b]) => b - a) // Ordena os índices em ordem decrescente
-          .map(([index, messages]) => {
+          .map(([originalIndex, messages]) => {
             const botMessage = messages.find((msg) => msg.type === "bot");
             const preview = botMessage ? botMessage.text : messages[0]?.text ;
-            return { index, preview, fullChat: messages };
+            return { originalIndex, preview, fullChat: messages };
           });
 
         result[date] = sortedChats; // Adiciona os chats ordenados
@@ -57,9 +57,9 @@ export default {
     });
 
     // Função para carregar uma conversa
-    const loadConversation = (date, index) => {
-      conversationStore.selectChat = index;
-      emit("conversation-selected", conversationStore.conversations[date][index]);
+    const loadConversation = (date, originalIndex) => {
+      conversationStore.selectChat = originalIndex;
+      emit("conversation-selected", conversationStore.conversations[date][originalIndex]);
     };
 
     const startNewChat = conversationStore.startNewChat;
