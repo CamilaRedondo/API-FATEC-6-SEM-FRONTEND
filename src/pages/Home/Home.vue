@@ -1,11 +1,13 @@
 <template>
   <div class="home-container">
-    <div class="row">
-      <div class="col-3">
+    <div class="row h-100">
+      <!-- Sidebar: Oculta em telas pequenas -->
+      <div class="col-md-3 d-none d-md-block">
         <Sidebar />
       </div>
 
-      <div class="col-9">
+      <!-- Chat: Ocupa a largura total em telas menores -->
+      <div class="col-12 col-md-9">
         <Chat />
       </div>
     </div>

@@ -2,7 +2,8 @@
   <div class="chat-container">
     <div class="chat-messages" ref="chatMessages">
       <!-- Se não houver mensagens, renderiza a imagem  -->
-      <div v-if="!messages.length && !loading" class="logo-container">
+      <div v-if="!currentMessages.length && !loading" class="logo-container">
+
         <img
         class="logo"
         src="../../assets/images/LighthouseLogo.svg"
@@ -12,7 +13,7 @@
       <!-- Se houver mensagens, renderiza as mensagens -->
       <div class="h-100" v-else>
         <div
-          v-for="(message, index) in messages"
+          v-for="(message, index) in currentMessages"
           :key="index"
           class="chat-message-wrapper"
           :class="message.type"
@@ -64,22 +65,38 @@
 import MessageInputComponent from "../MessageInput/MessageInputComponent.vue";
 import SubmitButtonComponent from "../SubmitButton/SubmitButtonComponent.vue";
 import GridLoader from 'vue-spinner/src/GridLoader.vue'
+import { useConversationStore } from "@/stores/conversationStore.js";
+import { computed } from "vue";
+
 
 export default {
   name: "ChatComponent",
-  data() {
+  components: {
+    MessageInputComponent,
+    SubmitButtonComponent,
+    GridLoader,
+  },
+  setup() {
+    const conversationStore = useConversationStore();
+
+    // Computa a data atual
+    const currentDate = computed(() => new Date().toLocaleDateString("pt-BR"));
+
+    // Computa as mensagens do chat selecionado
+    const currentMessages = computed(() => {
+      const date = currentDate.value;
+      const selectChat = conversationStore.selectChat;
+      return conversationStore.conversations[date]?.[selectChat] || [];
+    });
+
     return {
+      conversationStore,
+      currentMessages,
       newMessage: "", // Nova mensagem a ser enviada
-      messages: [], // Armazena todas as mensagens
       socket: null, // WebSocket
     };
   },
-  components: {
-    MessageInputComponent,
-    SubmitButtonComponent, 
-    GridLoader,
   
-  },
   created() {
     // Inicia a conexão WebSocket
     this.connectWebSocket();
@@ -97,10 +114,12 @@ export default {
       // Quando o servidor envia uma mensagem
       this.socket.onmessage = (event) => {
         const botResponse = event.data;
+
         // Adiciona a resposta do bot nas mensagens
-        this.messages.push({ text: botResponse, type: "bot" });
+        this.conversationStore.addConversation(botResponse, "bot");
         this.loading = false;
         this.scrollToBottom();
+
       };
 
       // Quando a conexão é fechada
@@ -116,7 +135,8 @@ export default {
     sendMessage() {
       if (this.newMessage.trim()) {
         // Adiciona a mensagem do usuário
-        this.messages.push({ text: this.newMessage, type: "user" });
+
+         this.conversationStore.addConversation(this.newMessage, "user");
         this.loading = true;
        
 
