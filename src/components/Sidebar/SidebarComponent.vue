@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <DividerComponent/>
+    <DividerComponent />
 
     <ButtonComponent class="custom-button" @new-chat="startNewChat"/>
   </div>
@@ -46,8 +46,8 @@ export default {
         const sortedChats = Object.entries(chats)
           .sort(([a], [b]) => b - a) // Ordena os índices em ordem decrescente
           .map(([originalIndex, messages]) => {
-            const botMessage = messages.find((msg) => msg.type === "bot");
-            const preview = botMessage ? botMessage.text : messages[0]?.text ;
+            const botMessage = Array.isArray(messages) ? messages.find((msg) => msg.type === "bot") : null;
+            const preview = botMessage ? botMessage.text : (Array.isArray(messages) && messages[0]?.text);
             return { originalIndex, preview, fullChat: messages };
           });
 
