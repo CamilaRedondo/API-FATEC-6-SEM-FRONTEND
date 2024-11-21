@@ -1,12 +1,13 @@
 <template>
   <div class="chat-container">
-    <div class="chat-messages">
-      <!-- Se não houver mensagens, renderiza a imagem -->
-      <div v-if="!currentMessages.length" class="logo-container">
+    <div class="chat-messages" ref="chatMessages">
+      <!-- Se não houver mensagens, renderiza a imagem  -->
+      <div v-if="!currentMessages.length && !loading" class="logo-container">
+
         <img
-          class="logo"
-          src="../../assets/images/LighthouseLogo.svg"
-          alt="Logo"
+        class="logo"
+        src="../../assets/images/LighthouseLogo.svg"
+        alt="Logo"
         />
       </div>
       <!-- Se houver mensagens, renderiza as mensagens -->
@@ -38,6 +39,10 @@
             class="profile-icon"
           />
         </div>
+
+    <div v-if="loading" >
+      <grid-loader color="#7b7b7b" size="10px"></grid-loader>
+    </div>
       </div>
     </div>
 
@@ -50,6 +55,7 @@
       </div>
       <p class="chat-footer-info">
         LighthouseBot pode cometer erros. Considere verificar informações importantes.
+      
       </p>
     </div>
   </div>
@@ -58,14 +64,17 @@
 <script>
 import MessageInputComponent from "../MessageInput/MessageInputComponent.vue";
 import SubmitButtonComponent from "../SubmitButton/SubmitButtonComponent.vue";
+import GridLoader from 'vue-spinner/src/GridLoader.vue'
 import { useConversationStore } from "@/stores/conversationStore.js";
 import { computed } from "vue";
+
 
 export default {
   name: "ChatComponent",
   components: {
     MessageInputComponent,
     SubmitButtonComponent,
+    GridLoader,
   },
   setup() {
     const conversationStore = useConversationStore();
@@ -87,6 +96,7 @@ export default {
       socket: null, // WebSocket
     };
   },
+  
   created() {
     // Inicia a conexão WebSocket
     this.connectWebSocket();
@@ -104,7 +114,12 @@ export default {
       // Quando o servidor envia uma mensagem
       this.socket.onmessage = (event) => {
         const botResponse = event.data;
+
+        // Adiciona a resposta do bot nas mensagens
         this.conversationStore.addConversation(botResponse, "bot");
+        this.loading = false;
+        this.scrollToBottom();
+
       };
 
       // Quando a conexão é fechada
@@ -120,7 +135,10 @@ export default {
     sendMessage() {
       if (this.newMessage.trim()) {
         // Adiciona a mensagem do usuário
-        this.conversationStore.addConversation(this.newMessage, "user");
+
+         this.conversationStore.addConversation(this.newMessage, "user");
+        this.loading = true;
+       
 
         // Envia a mensagem para o servidor WebSocket
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -128,11 +146,21 @@ export default {
         } else {
           console.error("Conexão WebSocket não está aberta.");
         }
-
+        this.scrollToBottom();
         // Limpa o campo de input
         this.newMessage = "";
       }
     },
+
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatMessages = this.$refs.chatMessages;
+        if (chatMessages) {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      });
+    },
+
     formatMessage(text) {
     text = text.replace(/\n/g, '<br>');
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
