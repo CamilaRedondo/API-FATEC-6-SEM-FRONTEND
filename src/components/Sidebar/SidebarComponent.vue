@@ -42,7 +42,14 @@ export default {
     const groupedConversations = computed(() => {
       const data = conversationStore.conversations;
 
-      return Object.entries(data).reduce((result, [date, chats]) => {
+      // Ordena as datas em ordem decrescente
+      const orderedDates = Object.entries(data).sort(([dateA], [dateB]) => {
+        const [dayA, monthA, yearA] = dateA.split("/").map(Number);
+        const [dayB, monthB, yearB] = dateB.split("/").map(Number);
+        return new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA);
+      });
+
+      return orderedDates.reduce((result, [date, chats]) => {
         const sortedChats = Object.entries(chats)
           .sort(([a], [b]) => b - a) // Ordena os índices em ordem decrescente
           .map(([originalIndex, messages]) => {
@@ -58,6 +65,7 @@ export default {
 
     // Função para carregar uma conversa
     const loadConversation = (date, originalIndex) => {
+      conversationStore.selectDate = date;
       conversationStore.selectChat = originalIndex;
       emit("conversation-selected", conversationStore.conversations[date][originalIndex]);
     };
