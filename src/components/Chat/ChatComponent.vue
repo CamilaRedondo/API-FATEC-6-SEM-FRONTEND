@@ -1,18 +1,19 @@
 <template>
   <div class="chat-container">
-    <div class="chat-messages">
-      <!-- Se não houver mensagens, renderiza a imagem -->
-      <div v-if="!messages.length" class="logo-container">
+    <div class="chat-messages" ref="chatMessages">
+      <!-- Se não houver mensagens, renderiza a imagem  -->
+      <div v-if="!currentMessages.length && !loading" class="logo-container">
+
         <img
-          class="logo"
-          src="../../assets/images/LighthouseLogo.svg"
-          alt="Logo"
+        class="logo"
+        src="../../assets/images/LighthouseLogo.svg"
+        alt="Logo"
         />
       </div>
       <!-- Se houver mensagens, renderiza as mensagens -->
       <div class="h-100" v-else>
         <div
-          v-for="(message, index) in messages"
+          v-for="(message, index) in currentMessages"
           :key="index"
           class="chat-message-wrapper"
           :class="message.type"
@@ -25,9 +26,10 @@
             class="profile-icon"
           />
 
-          <div class="chat-message" :class="message.type">
-            <p>{{ message.text }}</p>
-          </div>
+          <div class="chat-message"
+          v-html="formatMessage(message.text)" 
+          :class="message.type">
+        </div>
 
           <!-- Ícone do usuário ao lado direito -->
           <img
@@ -37,6 +39,10 @@
             class="profile-icon"
           />
         </div>
+
+    <div v-if="loading" >
+      <grid-loader color="#7b7b7b" size="10px"></grid-loader>
+    </div>
       </div>
     </div>
 
@@ -49,6 +55,7 @@
       </div>
       <p class="chat-footer-info">
         LighthouseBot pode cometer erros. Considere verificar informações importantes.
+      
       </p>
     </div>
   </div>
@@ -57,20 +64,36 @@
 <script>
 import MessageInputComponent from "../MessageInput/MessageInputComponent.vue";
 import SubmitButtonComponent from "../SubmitButton/SubmitButtonComponent.vue";
+import GridLoader from 'vue-spinner/src/GridLoader.vue'
+import { useConversationStore } from "@/stores/conversationStore.js";
+import { computed } from "vue";
+
 
 export default {
   name: "ChatComponent",
-  data() {
-    return {
-      newMessage: "", // Nova mensagem a ser enviada
-      messages: [], // Armazena todas as mensagens
-      socket: null, // WebSocket
-    };
-  },
   components: {
     MessageInputComponent,
     SubmitButtonComponent,
+    GridLoader,
   },
+  setup() {
+    const conversationStore = useConversationStore();
+
+    // Computa as mensagens do chat selecionado
+    const currentMessages = computed(() => {
+      const selectDate = conversationStore.selectDate;
+      const selectChat = conversationStore.selectChat;
+      return conversationStore.conversations[selectDate]?.[selectChat] || [];
+    });
+
+    return {
+      conversationStore,
+      currentMessages,
+      newMessage: "", // Nova mensagem a ser enviada
+      socket: null, // WebSocket
+    };
+  },
+  
   created() {
     // Inicia a conexão WebSocket
     this.connectWebSocket();
@@ -88,8 +111,12 @@ export default {
       // Quando o servidor envia uma mensagem
       this.socket.onmessage = (event) => {
         const botResponse = event.data;
+
         // Adiciona a resposta do bot nas mensagens
-        this.messages.push({ text: botResponse, type: "bot" });
+        this.conversationStore.addConversation(botResponse, "bot");
+        this.loading = false;
+        this.scrollToBottom();
+
       };
 
       // Quando a conexão é fechada
@@ -105,7 +132,10 @@ export default {
     sendMessage() {
       if (this.newMessage.trim()) {
         // Adiciona a mensagem do usuário
-        this.messages.push({ text: this.newMessage, type: "user" });
+
+         this.conversationStore.addConversation(this.newMessage, "user");
+        this.loading = true;
+       
 
         // Envia a mensagem para o servidor WebSocket
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -113,11 +143,27 @@ export default {
         } else {
           console.error("Conexão WebSocket não está aberta.");
         }
-
+        this.scrollToBottom();
         // Limpa o campo de input
         this.newMessage = "";
       }
     },
+
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatMessages = this.$refs.chatMessages;
+        if (chatMessages) {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      });
+    },
+
+    formatMessage(text) {
+    text = text.replace(/\n/g, '<br>');
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    return text;
+  },
   },
   beforeUnmount() {
     // Fecha a conexão WebSocket quando o componente for destruído
