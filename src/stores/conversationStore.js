@@ -4,6 +4,7 @@ export const useConversationStore = defineStore("conversationStore", {
   state: () => ({
     conversations: JSON.parse(localStorage.getItem("conversations") || "{}"),
     selectChat: 0,
+    selectDate: Date(),
   }),
   actions: {
     formatDate(date = new Date()) {
@@ -14,6 +15,7 @@ export const useConversationStore = defineStore("conversationStore", {
       if (!this.conversations[date]) {
         this.conversations[date] = {}; // Inicializa como um dicionário
         this.selectChat = 0; // Define o primeiro chat como padrão
+        this.selectDate = date;
       }
       // Cria o chat `selectChat` caso ele não exista
       if (!this.conversations[date][this.selectChat]) {
@@ -37,7 +39,8 @@ export const useConversationStore = defineStore("conversationStore", {
     },
     startNewChat() {
       const date = this.formatDate();
-
+      this.initializeDate(date);
+      
       // Verifica se o chat atual está vazio antes de criar um novo
       const currentChat = this.conversations[date][this.selectChat];
       if (currentChat && currentChat.length === 0) {
